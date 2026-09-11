@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate skill
+        run: |
+          set -euo pipefail
+          test -f SKILL.md
+          test -f references/coveragex.md
+          test -f references/dotnet-coverage.md
+          test -f references/dotnet-test.md
+          test -f scripts/verify_coverage_xml.py
+          python3 scripts/verify_coverage_xml.py --self-test
+
+      - name: Package skill
+        run: |
+          set -euo pipefail
+          package="coveragex-incremental-report-${GITHUB_REF_NAME}"
+          root="${RUNNER_TEMP}/coveragex-incremental-report"
+          mkdir -p "${root}/references" "${root}/scripts"
+          cp SKILL.md README.md LICENSE "${root}/"
+          cp references/*.md "${root}/references/"
+          cp scripts/verify_coverage_xml.py "${root}/scripts/"
+          (cd "${RUNNER_TEMP}" && zip -qr "${GITHUB_WORKSPACE}/${package}.zip" coveragex-incremental-report)
+          sha256sum "${package}.zip" > "${package}.zip.sha256"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            "coveragex-incremental-report-${GITHUB_REF_NAME}.zip" \
+            "coveragex-incremental-report-${GITHUB_REF_NAME}.zip.sha256" \
+            --generate-notes \
+            --verify-tag
