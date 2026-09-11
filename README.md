@@ -4,6 +4,8 @@ CoverageX Agent Skill generates fresh .NET coverage XML with `dotnet-coverage` o
 
 Coverage collection belongs to this Skill. CoverageX remains focused on consuming coverage XML and generating incremental analysis and output.
 
+See [Marketplace and plugin layout](docs/marketplace-layout.md) for the roles of the Codex and Cursor manifests and why both platforms share one canonical Skill.
+
 ## Codex
 
 In Codex, add this repository as a plugin marketplace:
