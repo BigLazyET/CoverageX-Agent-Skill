@@ -1,56 +1,56 @@
-# CoverageX Incremental Report Skill
+# CoverageX Agent Skill
 
-An Agent Skill for Codex, Cursor, and compatible AI harnesses. It generates fresh .NET coverage XML with `dotnet-coverage` or `dotnet test`, verifies the XML, then asks CoverageX to produce an incremental coverage report.
+CoverageX Agent Skill generates fresh .NET coverage XML with `dotnet-coverage` or `dotnet test`, verifies it, then asks CoverageX to produce an incremental coverage report.
 
 Coverage collection belongs to this Skill. CoverageX remains focused on consuming coverage XML and generating incremental analysis and output.
 
-## Install
+## Codex
 
-Download and extract a Release asset, or clone this repository. Copy the complete directory so that `SKILL.md`, `references/`, and `scripts/` stay together.
+In Codex, add this repository as a plugin marketplace:
 
-Codex, user installation:
-
-```bash
-mkdir -p ~/.codex/skills/coveragex-incremental-report
-cp -R SKILL.md references scripts ~/.codex/skills/coveragex-incremental-report/
+```text
+https://github.com/BigLazyET/CoverageX-Agent-Skill
 ```
 
-Codex, project installation:
+Then install `coveragex-agent-skill` from the `coveragex` marketplace and start a new thread so Codex discovers the Skill.
+
+For the Codex CLI, clone the repository and add its local path before installing the plugin:
 
 ```bash
-mkdir -p .agents/skills/coveragex-incremental-report
-cp -R SKILL.md references scripts .agents/skills/coveragex-incremental-report/
+git clone https://github.com/BigLazyET/CoverageX-Agent-Skill.git
+codex plugin marketplace add ./CoverageX-Agent-Skill
+codex plugin add coveragex-agent-skill@coveragex
 ```
 
-Cursor, project installation:
+## Cursor
 
-```bash
-mkdir -p .cursor/skills/coveragex-incremental-report
-cp -R SKILL.md references scripts .cursor/skills/coveragex-incremental-report/
+Open Cursor Marketplace, choose **Add Marketplace from GitHub Repository**, and enter:
+
+```text
+https://github.com/BigLazyET/CoverageX-Agent-Skill
 ```
 
-Restart or reload the AI harness after installation.
+Install `coveragex-agent-skill` from the imported marketplace, then reload Cursor.
+
+## Manual fallback
+
+The canonical Skill is stored at:
+
+```text
+plugins/coveragex-agent-skill/skills/coveragex-incremental-report/
+```
+
+Copy that complete directory to `~/.codex/skills/`, `.agents/skills/`, or `.cursor/skills/` when marketplace installation is unavailable.
 
 ## Use
 
-Ask the harness to generate a fresh .NET coverage XML and a CoverageX incremental report. The Skill offers `dotnet-coverage` and `dotnet test`; if no producer is selected, it prefers `dotnet-coverage`.
+Ask the harness to generate fresh .NET coverage XML and a CoverageX incremental report. The Skill offers `dotnet-coverage` and `dotnet test`; if no producer is selected, it prefers `dotnet-coverage`.
 
-On first use, the Skill checks prerequisites. It never installs `dotnet-coverage` or `CoverageX.Command` without explicit approval. The CLI is installed from NuGet with:
-
-```bash
-dotnet tool install --global CoverageX.Command
-```
-
-If an already configured `CoverageX.McpServer` is available, the Skill can use it instead. The Skill does not bundle either NuGet package.
+On first use, the Skill checks prerequisites. It never installs `dotnet-coverage` or `CoverageX.Command` without explicit approval. It can use an already configured `CoverageX.McpServer`, but does not bundle either CoverageX NuGet package.
 
 ## Releases
 
-Each `v*` tag creates a GitHub Release containing:
-
-- `coveragex-incremental-report-<version>.zip`
-- its `SHA256` checksum
-
-The archive always contains one top-level `coveragex-incremental-report/` directory ready to copy into a harness skill directory.
+Each `v*` tag creates a GitHub Release containing the complete dual-marketplace repository as `coveragex-agent-skill-<version>.zip` plus its SHA256 checksum.
 
 ## License
 

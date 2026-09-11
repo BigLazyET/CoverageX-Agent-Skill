@@ -1,0 +1,13 @@
+{
+  "name": "coveragex-agent-skill",
+  "version": "1.0.0",
+  "description": "Generate fresh .NET coverage XML and run CoverageX incremental reports",
+  "author": {
+    "name": "BigLazyET",
+    "email": "xjl505302554@outlook.com"
+  },
+  "homepage": "https://github.com/BigLazyET/CoverageX-Agent-Skill",
+  "repository": "https://github.com/BigLazyET/CoverageX-Agent-Skill",
+  "license": "Apache-2.0",
+  "keywords": ["coveragex", "dotnet", "coverage", "incremental-report"]
+}

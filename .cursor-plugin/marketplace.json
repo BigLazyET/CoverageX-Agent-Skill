@@ -1,0 +1,18 @@
+{
+  "name": "coveragex",
+  "owner": {
+    "name": "BigLazyET",
+    "email": "xjl505302554@outlook.com"
+  },
+  "metadata": {
+    "description": "CoverageX plugins for .NET incremental coverage workflows",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "coveragex-agent-skill",
+      "source": "plugins/coveragex-agent-skill",
+      "description": "Generate fresh .NET coverage XML and run CoverageX incremental reports"
+    }
+  ]
+}
