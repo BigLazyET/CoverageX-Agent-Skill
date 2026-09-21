@@ -24,6 +24,13 @@ codex plugin marketplace add ./CoverageX-Agent-Skill
 codex plugin add coveragex-agent-skill@coveragex
 ```
 
+Codex stores Marketplace plugins in the current user's plugin cache, so this is a user-level installation available across projects. A trusted project can override whether the plugin is enabled in `.codex/config.toml`:
+
+```toml
+[plugins."coveragex-agent-skill@coveragex"]
+enabled = true
+```
+
 ## Cursor
 
 Open Cursor Marketplace, choose **Add Marketplace from GitHub Repository**, and enter:
@@ -34,6 +41,36 @@ https://github.com/BigLazyET/CoverageX-Agent-Skill
 
 Install `coveragex-agent-skill` from the imported marketplace, then reload Cursor.
 
+When installing, Cursor lets you choose the scope:
+
+- **User** makes the plugin available across your projects.
+- **Project** limits it to the current project.
+
+## Install with the Skills CLI
+
+The third-party [`skills`](https://github.com/vercel-labs/skills) CLI can install the Skill directly from this Git repository without adding the Marketplace.
+
+Project-level installation is the default. Run this from the project that should use the Skill:
+
+```bash
+npx skills@latest add BigLazyET/CoverageX-Agent-Skill \
+  --skill coveragex-incremental-report \
+  --agent codex cursor
+```
+
+Codex and Cursor share the project-level `.agents/skills/` location, so one installed copy works for both.
+
+For a user-level installation available across projects, add `--global`:
+
+```bash
+npx skills@latest add BigLazyET/CoverageX-Agent-Skill \
+  --skill coveragex-incremental-report \
+  --agent codex cursor \
+  --global
+```
+
+At user scope, the CLI installs the Skill into each agent's global Skill location (`~/.codex/skills/` and `~/.cursor/skills/`).
+
 ## Manual fallback
 
 The canonical Skill is stored at:
@@ -43,6 +80,9 @@ plugins/coveragex-agent-skill/skills/coveragex-incremental-report/
 ```
 
 Copy that complete directory to `~/.codex/skills/`, `.agents/skills/`, or `.cursor/skills/` when marketplace installation is unavailable.
+
+- `~/.codex/skills/` and `~/.cursor/skills/` are user-level locations.
+- `.agents/skills/` and `.cursor/skills/` inside a project are project-level locations.
 
 ## Use
 
