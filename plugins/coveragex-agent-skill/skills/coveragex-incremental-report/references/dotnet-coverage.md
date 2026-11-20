@@ -1,47 +1,55 @@
-# dotnet-coverage producer
+# dotnet-coverage application collection
 
-Use this path when selected by the user or when no producer was selected.
+## Startup prerequisites and mode
 
-## Preconditions
+Check installed `dotnet-coverage --version`; installation needs separate approval. Detect OS/version/architecture and check the current [Microsoft support matrix](https://github.com/microsoft/codecoverage/blob/main/docs/supported-os.md#supported-os-versions) and [command reference](https://learn.microsoft.com/dotnet/core/additional-tools/dotnet-coverage).
 
-1. Check `dotnet-coverage --version`.
-2. If missing, present `dotnet tool install --global dotnet-coverage` and request permission. After approval, run it and verify `dotnet-coverage --version`; otherwise stop.
-3. Detect OS, version, and architecture. Compare them with the [Microsoft codecoverage support matrix](https://github.com/microsoft/codecoverage/blob/main/docs/supported-os.md#supported-os-versions). Dynamic instrumentation is supported on Windows x64/x86/Arm64; Alpine 3.15+, CentOS 8+, Debian 10+, Fedora 33+, OpenSUSE 15+, Oracle Linux 7+, RHEL 7+, SLES 12 SP+, and Ubuntu 18.04+ on x64; and macOS 10.15+ on x64. Treat every matrix row marked unsupported, an older version, or an unlisted/best-effort host as unavailable for this workflow. State that only `dotnet test` remains; do not silently switch or enable static instrumentation.
-4. On supported macOS/Linux hosts, require `libxml2`; on Alpine 3.18+, also require `libintl`. Stop with dependency guidance if a requirement is missing because Dynamic instrumentation may otherwise yield an empty report.
+Respect the selected mode. When unspecified, retain dynamic as the default on supported hosts. Dynamic managed instrumentation supports Windows x64/x86/Arm64, supported Linux x64 and macOS x64; require documented OS minimums and native dependencies (`libxml2` on macOS/Linux, also `libintl` on Alpine 3.18+). Unlisted/unsupported dynamic hosts are not dynamically supported. If managed static instrumentation is available there (for example macOS ARM64), explain/select static **before startup**, rather than refusing collect/snapshot entirely. Do not silently change mode after a failure. Native modules are outside this workflow.
 
-## Interactive command-mode collection
+### Static DLL scope
 
-For finite VSTest collection instead, use the [single-invocation runner](run-report.md) after the prerequisites above. It writes final Cobertura XML directly. Interactive snapshot boundaries remain different from process-final coverage, which may include shutdown code.
+AI discovers the entry project, actual build configuration/TFM/runtime and business project dependencies. Use MSBuild/project output metadata, deployment assets and actual runtime-loading paths; account for custom AssemblyName/OutputPath and multiple TFMs. Do not construct DLL names solely from project names, instrument all third-party/system DLLs, or choose only changed modules.
 
-Generate a unique session ID. Start the application with command mode, not server mode:
+Preview inferred **absolute** DLL paths with project/build scope and offer “use inferred list” or “specify one/multiple DLLs” unless the user already explicitly chose inference or supplied paths. Wait for an unresolved choice; combine it with input/test choices where possible. Build matching outputs when required, then resolve/validate the final paths and matching symbols. Clarify ambiguity, missing files or mismatched source/build instead of guessing.
 
-```console
-dotnet-coverage collect --session-id <session-id> --output-format cobertura --output <final.xml> <application-command> <arguments...>
-```
+Use the actual application-loaded copies. For Material's SampleApi → SampleLibrary reference, both DLLs come from SampleApi's output directory, not each project's separate bin directory. A user's intentional narrower scope must also narrow the report scope explicitly; do not claim complete coverage with omitted modules. Static instrumentation may alter authorized build outputs; do not promise automatic restoration after abnormal termination.
 
-For example:
+## Start once, then share the lifecycle
 
-```console
-dotnet-coverage collect --session-id coveragex-<unique-id> --output-format cobertura --output artifacts/coverage/final.xml dotnet run --project src/WebApi/WebApi.csproj
-```
+AI builds once with matching settings, then runs the freshly built entry DLL, retaining application arguments. Never infer freshness from a DLL's existence. Check known ports first and do not terminate their owners. Start an authorized unique command-mode session in a persistent host terminal/process (no `--server-mode`).
 
-Run this in a persistent foreground terminal. Never add `--server-mode`. Wait until the output shows the session ID and the application is ready, then tell the user to exercise the application through Swagger, Apifox, or their normal client.
-
-When this workflow has already built the application with matching configuration/framework/runtime, collect `dotnet <fresh-application.dll>` instead of invoking another build through `dotnet run`. Keep all application arguments. Never infer that existing binaries are current.
-
-## Snapshots
-
-While the command-mode session is active, the user may request repeated snapshots:
+Dynamic:
 
 ```console
-dotnet-coverage snapshot <session-id> --output <snapshot.coverage>
-dotnet-coverage merge --output <snapshot.cobertura.xml> --output-format cobertura <snapshot.coverage>
+dotnet-coverage collect --session-id <id> --output-format cobertura --output <run/final.xml> dotnet <fresh-entry.dll> <app-args...>
 ```
 
-The documented `snapshot` command has no output-format option, so treat its output as native coverage data and convert it explicitly before passing it to the XML verifier. Do not assume an `.xml` extension changes the format.
+Static differs only by explicit matching module parameters:
 
-Use `--reset` only when the user wants the next snapshot to exclude earlier hits.
+```console
+dotnet-coverage collect --session-id <id> --include-files <absolute-entry.dll> --include-files <absolute-business-library.dll> --output-format cobertura --output <run/final.xml> dotnet <fresh-entry.dll> <app-args...>
+```
 
-When the user is finished, request/confirm process termination as appropriate. `dotnet-coverage shutdown <session-id>` addresses a collection session; preserve the final Cobertura output and verify it before running CoverageX.
+Pass each `--include-files` separately; correctly quote paths with spaces. Keep the session ID, mode and DLL scope. AI checks process/readiness/health, then runs agreed existing business automation and checks success, or gives the manual user the URL and asks them to signal completion. Startup/health alone is not business testing. Failed tests are reported and not presented as successful exercise.
 
-Official command reference: [dotnet-coverage](https://learn.microsoft.com/dotnet/core/additional-tools/dotnet-coverage).
+Inspect automation before recommending it: an end-to-end demo that starts its own collector or generates a report is not a request-only test script for this active session. Do not run it to bypass input confirmation or create a second session; recommend suitable existing request/tests or manual exercise instead.
+
+If only useful request commands embedded inside such a demo exist, AI may prepare a request-only plan from them, label it as extracted preparation rather than an existing standalone test script, and resolve the test choice in the plan card. After an agreed manual exercise is done, proceed to snapshot without replaying those requests or making the user reconfirm the test plan.
+
+For **finite VSTest** instead, use [run-report.md](run-report.md). Its dynamic-only platform guard does not govern this static application path; finite final XML remains distinct from an interactive snapshot.
+
+## Snapshot and report, repeatedly
+
+After business exercise, AI records the snapshot start time and uses new explicit paths:
+
+```console
+dotnet-coverage snapshot <id> --output <run/snapshot-N.coverage>
+dotnet-coverage merge <run/snapshot-N.coverage> --output-format cobertura --output <run/snapshot-N.xml>
+python3 scripts/verify_coverage_xml.py <run/snapshot-N.xml> --since <snapshot-start-unix-seconds>
+```
+
+Snapshot has **no output-format** option. Its native output requires merge; naming it `.xml` does not convert it. Verify the operation succeeded and the raw/derived lineage is current. Follow [input-policy.md](input-policy.md): confirm the final logical inputs before each report, then consume only explicit verified XML.
+
+Snapshot does not shut down the application. Default snapshots are cumulative; do not reset or automatically merge them. Use `--reset` only when explicitly requested, recording the interval. Retain context so subsequent requests do not repeat setup or DLL questions.
+
+When finished, shut down only the owned session with applicable cleanup authorization: `dotnet-coverage shutdown <id>`. A successful explicit shutdown can yield child exit 137/143; accept those only with confirmed successful shutdown and valid expected output. Do not repeat normal shutdown from cleanup. Preserve final output but do not substitute it for a requested snapshot or automatically add it to report inputs.

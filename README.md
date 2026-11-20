@@ -1,6 +1,6 @@
 # CoverageX Agent Skill
 
-CoverageX Agent Skill generates fresh .NET coverage XML with `dotnet-coverage` or `dotnet test`, verifies it, then asks CoverageX to produce an incremental coverage report.
+CoverageX Agent Skill prepares new .NET coverage with `dotnet-coverage` or `dotnet test`, or validates selected existing coverage, then generates an incremental report after the user confirms its inputs.
 
 Coverage collection belongs to this Skill. CoverageX remains focused on consuming coverage XML and generating incremental analysis and output.
 
@@ -86,11 +86,11 @@ Copy that complete directory to `~/.codex/skills/`, `.agents/skills/`, or `.curs
 
 ## Use
 
-Ask the harness to generate fresh .NET coverage XML and a CoverageX incremental report. The Skill offers `dotnet-coverage` and `dotnet test`; if no producer is selected, it prefers `dotnet-coverage`.
+Ask the harness for a CoverageX incremental report. AI discovers projects, DLLs and existing tests, then combines unresolved choices in a short plan. Choose current-run inputs (recommended) or allow selected existing files for this session. New application collection supports static and dynamic startup with the same collect → exercise → snapshot → merge workflow. Static collection offers inferred business DLLs or explicit paths. AI starts/checks the app and runs agreed existing tests; manual users only need to exercise it and say when done. Each report retains one final input-list confirmation.
 
 On first use, the Skill checks prerequisites. It never installs `dotnet-coverage` or `CoverageX.Command` without explicit approval. It can use an already configured `CoverageX.McpServer`, but does not bundle either CoverageX NuGet package.
 
-For finite VSTest workflows with default Html output, the bundled [report runner](plugins/coveragex-agent-skill/skills/coveragex-incremental-report/references/run-report.md) builds once, collects and validates fresh XML, then generates a local report in one invocation. It emits stage timings and can hand verified inputs to an already connected MCP. Interactive snapshots and custom report options retain their existing workflow.
+For finite VSTest workflows with default Html output, the bundled [report runner](plugins/coveragex-agent-skill/skills/coveragex-incremental-report/references/run-report.md) builds once, collects and validates fresh XML with `--entry-point prepare`. After the user confirms those files, AI calls the CLI or connected MCP without repeating collection. Standalone CLI/MCP modes remain compatible. Repeated application snapshots keep the app running and session context is retained; existing-only XML skips startup and build.
 
 ## Releases
 

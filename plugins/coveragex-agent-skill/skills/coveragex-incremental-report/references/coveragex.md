@@ -1,6 +1,6 @@
 # CoverageX consumer
 
-CoverageX consumes verified XML; it does not generate it.
+CoverageX consumes verified XML; it does not generate it. Follow [input-policy.md](input-policy.md) and obtain confirmation of the final logical input list for each report before calling any consumer. Use only the corresponding verified explicit XML paths; do not add files after confirmation.
 
 ## Select the entry point
 
@@ -19,7 +19,7 @@ Do not install the CLI when MCP is already available, install both entry points 
 
 Use local mode when the runtime source tree is the existing Git working tree:
 
-Prefer this path for matching local sources. Pass the verifier's explicit XML paths directly; do not rescan an output directory or enable `noPull` as a shortcut for checking source freshness. The finite runner can call this CLI path or return a handoff for an already connected MCP.
+Prefer this path for matching local sources. Pass the verifier's explicit XML paths directly; do not rescan an output directory or enable `noPull` as a shortcut for checking source freshness. In the Skill, the finite runner uses `--entry-point prepare`; after final input confirmation, the host calls this CLI path or the already connected MCP with the returned arguments. Standalone CLI/MCP runner modes remain available for already-confirmed calls.
 
 ```console
 coveragex lreport --source <source> --target <target> --source-directory <repo> --runtime-branch <runtime-branch> --report-input-files <file1;file2>

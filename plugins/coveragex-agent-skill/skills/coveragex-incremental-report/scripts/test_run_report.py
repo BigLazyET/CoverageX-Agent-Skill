@@ -81,6 +81,25 @@ class PipelineTests(unittest.TestCase):
         self.assertNotIn("entryReportPath", result)
         self.assertFalse(any("lreport" in call for call in self.calls))
 
+    def test_prepare_returns_exact_inputs_without_consumer_or_report(self):
+        result = self.run_pipeline(self.args("--entry-point", "prepare", "--coveragex", "missing-cli"))
+        self.assertTrue(result["success"], result)
+        self.assertEqual(result["status"], "ready-for-input-confirmation")
+        self.assertEqual(result["arguments"]["reportFiles"], result["verifiedXml"])
+        self.assertEqual(result["executedTests"], 2)
+        self.assertNotIn("entryReportPath", result)
+        self.assertNotIn("report", result["timingsMs"])
+        self.assertFalse((Path(result["runDirectory"]) / "report").exists())
+        self.assertFalse(any("lreport" in call for call in self.calls))
+
+    def test_prepare_rejects_bad_xml_before_handoff(self):
+        self.xml = "<coverage>"
+        result = self.run_pipeline(self.args("--entry-point", "prepare"))
+        self.assertFalse(result["success"])
+        self.assertEqual(result["failedStage"], "verify")
+        self.assertNotIn("arguments", result)
+        self.assertFalse(any("lreport" in call for call in self.calls))
+
     def test_reject_zero_failed_stale_or_malformed_inputs_before_report(self):
         for setting, value, stage in (("executed", 0, "test-results"), ("failed", True, "test-results"),
                                       ("stale", True, "verify"), ("xml", "<coverage>", "verify")):

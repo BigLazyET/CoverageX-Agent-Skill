@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build once, collect finite VSTest coverage, verify it, and report locally."""
+"""Build once, collect finite VSTest coverage, and prepare inputs or report locally."""
 
 from __future__ import annotations
 
@@ -47,8 +47,8 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("--framework")
     result.add_argument("--runtime")
     result.add_argument("--output-directory", type=Path, required=True, help="Parent for a new, isolated run directory")
-    result.add_argument("--entry-point", choices=("cli", "mcp"), default="cli")
-    result.add_argument("--coveragex", default="coveragex", help="CLI executable; ignored for MCP handoff")
+    result.add_argument("--entry-point", choices=("prepare", "cli", "mcp"), default="cli")
+    result.add_argument("--coveragex", default="coveragex", help="CLI executable; used only with entry-point cli")
     return result
 
 
@@ -142,7 +142,9 @@ def run(args: argparse.Namespace) -> dict:
         report = {"source": args.source, "target": args.target, "sourceDirectory": str(repo),
                   "runtimeBranch": args.runtime_branch or args.source, "reportFiles": files,
                   "reportDirectory": str(run_directory / "report"), "reportTypes": ["Html"]}
-        if args.entry_point == "mcp":
+        if args.entry_point == "prepare":
+            result.update(success=True, status="ready-for-input-confirmation", arguments=report)
+        elif args.entry_point == "mcp":
             result.update(success=True, status="ready-for-mcp", mcpTool="GenerateLocalIncrementalReport", arguments=report)
         else:
             timed("report", lambda: command([args.coveragex, "lreport", "--source", args.source, "--target", args.target,

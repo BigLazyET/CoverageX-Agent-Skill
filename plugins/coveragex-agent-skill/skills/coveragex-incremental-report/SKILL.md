@@ -1,48 +1,52 @@
 ---
 name: coveragex-incremental-report
-description: Generate fresh .NET coverage XML with dotnet-coverage or dotnet test, verify it, then run CoverageX incremental reports through its CLI or MCP. Use when an AI harness must orchestrate collection before CoverageX; do not use to add collection features to CoverageX itself.
+description: Prepare .NET coverage with dotnet-coverage or dotnet test, or validate selected existing coverage, then generate a CoverageX incremental report after input confirmation. Use for AI orchestration of coverage and reporting; collection stays outside CoverageX.
 ---
 
 # CoverageX Incremental Report
 
-Keep the product boundary explicit: this skill owns coverage collection orchestration; CoverageX only consumes existing XML and generates incremental reports.
+This Skill prepares coverage; CoverageX consumes verified XML. Keep collection outside Core.
 
-## Choose the producer
+## Prepare a short plan
 
-Offer the user `dotnet-coverage` and `dotnet test`. If they do not choose, use `dotnet-coverage`.
+Discover the repository/refs, runtime source, entry project and build settings, platform, existing tests/scripts and relevant artifact candidates. Infer facts from project/build evidence rather than asking the user to repeat them. Read [input-policy.md](references/input-policy.md) for input selection and the final confirmation gate.
 
-- For `dotnet-coverage`, read [dotnet-coverage.md](references/dotnet-coverage.md).
-- For `dotnet test`, read [dotnet-test.md](references/dotnet-test.md).
+Combine unresolved choices in one short recommended plan card:
 
-Do not silently switch producers after a failure.
+- Input policy: **new-only** (recommended) or **allow-existing**, remembered for this session. Allow-existing adds the option to select files or collect new data; it does not select files automatically.
+- For new collection: producer (`dotnet-coverage` by default, or explicitly selected `dotnet test`), application/test command and mode. New static application collection offers inferred business DLLs versus user-specified paths, with the actual inferred list previewed.
+- Test plan: execute the user's existing command, or recommend discovered automation. If none is suitable, let the user exercise the application manually.
 
-## Finite test fast path
+Preserve explicit choices; do not repeat answered questions. If a choice is unresolved, present native host options or short text options and wait; preselection or timeout is not an answer. Existing-only inputs skip unnecessary build, application startup, DLL selection and collector installation.
 
-When the request uses an existing VSTest project/solution, all inputs are known, and Html with the default filters is sufficient, read [run-report.md](references/run-report.md). Its bundled runner builds once, runs the complete tests without another build, verifies fresh XML, and generates a local report in one invocation. With an already connected MCP, request a verified-input handoff instead of installing a CLI.
+## Collect or reuse
 
-Keep the workflow below for interactive applications, custom report options, artifact sources, or test platforms other than VSTest. Preserve the user's selected producer and options.
+- New long-running applications: read [dotnet-coverage.md](references/dotnet-coverage.md). Static and dynamic share collect → exercise → snapshot → merge → verify. Only startup prerequisites/parameters differ.
+- Finite VSTest with default Html/options: read [run-report.md](references/run-report.md). Call the runner with **`--entry-point prepare`**, then confirm inputs and invoke the existing consumer separately. Never use its default CLI branch to bypass the gate.
+- Explicit `dotnet test`: read [dotnet-test.md](references/dotnet-test.md). Require real successful executed tests.
+- Selected existing files: follow [input-policy.md](references/input-policy.md); native `.coverage` needs conversion, supported XML can be verified directly.
 
-## Required workflow
+Do not silently switch producers/modes, reduce test or DLL scope, or substitute final coverage for a requested snapshot after a failure.
 
-1. Resolve the source/target branches, runtime source tree, application or test command, and output directory.
-2. Record the collection start time as Unix seconds immediately before collection.
-3. Run the selected producer and follow its stopping/interaction rules.
-4. Before invoking CoverageX, run:
+## Confirm inputs and report
 
-   ```console
-   python3 scripts/verify_coverage_xml.py --since <unix-seconds> <xml-file-or-directory>...
-   ```
+Validate the explicit XML and its collection/source/scope provenance. Before **each** report, show the final logical input list with absolute raw/derived paths, format, time, source/session and cumulative interval, then wait for confirmation. Combine file selection and “generate from these files” in one interaction when possible. A confirmed unchanged final list needs no second approval; changed inputs or scope require confirmation again.
 
-5. Continue only when the verifier exits zero and returns at least one explicit XML path. Pass only those paths to CoverageX.
-6. Read [coveragex.md](references/coveragex.md), select CLI or an already connected MCP server, and run the local or artifact report workflow.
-7. Report the producer, session ID when applicable, verified XML paths, CoverageX entry point, and report result/location.
+Read [coveragex.md](references/coveragex.md) and invoke CLI or an already connected MCP with only that confirmed, verified XML list. Check the actual consumer result before claiming report completion. Return the report link and a concise result; keep tool time separate from waiting for the user.
 
-Stop before CoverageX when collection fails, no fresh XML exists, XML parsing fails, the producer prerequisite is absent, or required Git/report inputs are unresolved.
+Stop on failed collection/tests, missing or malformed data, unresolved required Git/source/scope information, or absent final input confirmation.
+
+## Keep the user's context
+
+AI builds matching outputs, starts the agreed collection session, checks readiness and runs agreed automation. Readiness is not business testing. For manual exercise, show the address and one next step: tell AI when testing is done. AI then snapshots, converts and verifies; the user need not remember commands or paths.
+
+Once the selected tests are complete, advance to the requested snapshot; do not replay automation after the user has completed the agreed manual exercise. Recommend additional tests only for a demonstrated gap and obtain the needed choice before running them.
+
+Retain a concise session record: repository/refs, project/build, mode/DLL scope, session ID, address/readiness, input policy, tests/progress, artifacts and pending step. Reuse conversation summaries/helper output; only if necessary write a small session.json in the run directory. Do not add a global state service, permanent preferences or credentials. Reuse this context on follow-up requests and repeated snapshots.
 
 ## Permission boundaries
 
-- Missing `dotnet-coverage`: show `dotnet tool install --global dotnet-coverage`, explain that it changes the user's global .NET tools, and ask for approval. Install and verify only after explicit approval.
-- Missing `coveragex` when no CoverageX MCP is connected: show `dotnet tool install --global CoverageX.Command`, explain that it changes the user's global .NET tools, and ask for approval. Install and run `coveragex help` only after explicit approval; stop on refusal or either failure.
-- Never add coverage packages or edit a target test project without explicit approval.
-- Never publish packages, start an indefinite process, access a private repository, or terminate a user's process without applicable authorization.
-- A request for a report is not authorization to install tools or modify the target repository.
+- Missing tools: show the exact global install command (`dotnet tool install --global dotnet-coverage` or `dotnet tool install --global CoverageX.Command`), explain its effect and obtain approval before installation; verify afterwards. Existing XML needs no collector; connected MCP needs no CLI installation.
+- Do not add packages or edit a target test project without explicit approval.
+- Starting the application through collect is AI's responsibility once the collection plan is authorized. Respect host execution permissions; stop on a port conflict without killing its owner. End only the owned session within agreed cleanup authorization.
+- Publishing, private-repository access and unrelated process termination need applicable authorization. A report request does not authorize tool installation or target-project edits.
