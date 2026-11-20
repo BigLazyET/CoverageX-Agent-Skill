@@ -27,3 +27,5 @@ Use the integration already present in the target repository:
 Do not guess that either integration exists. Do not add packages or edit project files unless the user explicitly approves that separate change.
 
 Require a successful test run with executed tests, then validate the newly created XML. Random GUID result directories are acceptable because the verifier returns explicit paths.
+
+For a finite VSTest run with default Html output, use the [single-invocation runner](run-report.md). It performs a matching build once and checks TRX execution counters before reporting. If a matching build has already been completed manually in the current workflow, avoid another build with `dotnet test --no-build --no-restore` using the same project, configuration, framework and runtime; do not reuse binaries merely because they exist.

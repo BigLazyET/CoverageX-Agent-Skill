@@ -39,9 +39,10 @@ def verify(inputs: list[Path], since: float) -> list[str]:
         except (OSError, ET.ParseError, ValueError) as exc:
             errors.append(f"{path}: {exc}")
 
+    if errors:
+        raise ValueError("; ".join(errors))
     if not valid:
-        detail = "; ".join(errors) if errors else "no XML files found"
-        raise ValueError(detail)
+        raise ValueError("no XML files found")
     return valid
 
 
@@ -59,6 +60,15 @@ def self_test() -> None:
             pass
         else:
             raise AssertionError("malformed XML was accepted")
+        other = root / "other.xml"
+        other.write_text('<coverage />', encoding="utf-8")
+        try:
+            verify([root], since)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("a malformed shard was ignored next to a valid report")
+        other.unlink()
         good.write_text('<coverage line-rate="1" />', encoding="utf-8")
         os.utime(good, (since - 10, since - 10))
         for inputs in ([root], []):

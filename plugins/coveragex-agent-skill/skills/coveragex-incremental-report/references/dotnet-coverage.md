@@ -11,6 +11,8 @@ Use this path when selected by the user or when no producer was selected.
 
 ## Interactive command-mode collection
 
+For finite VSTest collection instead, use the [single-invocation runner](run-report.md) after the prerequisites above. It writes final Cobertura XML directly. Interactive snapshot boundaries remain different from process-final coverage, which may include shutdown code.
+
 Generate a unique session ID. Start the application with command mode, not server mode:
 
 ```console
@@ -24,6 +26,8 @@ dotnet-coverage collect --session-id coveragex-<unique-id> --output-format cober
 ```
 
 Run this in a persistent foreground terminal. Never add `--server-mode`. Wait until the output shows the session ID and the application is ready, then tell the user to exercise the application through Swagger, Apifox, or their normal client.
+
+When this workflow has already built the application with matching configuration/framework/runtime, collect `dotnet <fresh-application.dll>` instead of invoking another build through `dotnet run`. Keep all application arguments. Never infer that existing binaries are current.
 
 ## Snapshots
 

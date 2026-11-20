@@ -90,6 +90,8 @@ Ask the harness to generate fresh .NET coverage XML and a CoverageX incremental 
 
 On first use, the Skill checks prerequisites. It never installs `dotnet-coverage` or `CoverageX.Command` without explicit approval. It can use an already configured `CoverageX.McpServer`, but does not bundle either CoverageX NuGet package.
 
+For finite VSTest workflows with default Html output, the bundled [report runner](plugins/coveragex-agent-skill/skills/coveragex-incremental-report/references/run-report.md) builds once, collects and validates fresh XML, then generates a local report in one invocation. It emits stage timings and can hand verified inputs to an already connected MCP. Interactive snapshots and custom report options retain their existing workflow.
+
 ## Releases
 
 Each `v*` tag creates a GitHub Release containing the complete dual-marketplace repository as `coveragex-agent-skill-<version>.zip` plus its SHA256 checksum.

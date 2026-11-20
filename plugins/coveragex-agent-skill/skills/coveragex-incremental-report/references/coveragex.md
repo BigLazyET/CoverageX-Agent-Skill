@@ -19,6 +19,8 @@ Do not install the CLI when MCP is already available, install both entry points 
 
 Use local mode when the runtime source tree is the existing Git working tree:
 
+Prefer this path for matching local sources. Pass the verifier's explicit XML paths directly; do not rescan an output directory or enable `noPull` as a shortcut for checking source freshness. The finite runner can call this CLI path or return a handoff for an already connected MCP.
+
 ```console
 coveragex lreport --source <source> --target <target> --source-directory <repo> --runtime-branch <runtime-branch> --report-input-files <file1;file2>
 ```

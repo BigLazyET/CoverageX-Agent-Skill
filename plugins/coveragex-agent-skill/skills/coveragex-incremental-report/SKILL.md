@@ -16,6 +16,12 @@ Offer the user `dotnet-coverage` and `dotnet test`. If they do not choose, use `
 
 Do not silently switch producers after a failure.
 
+## Finite test fast path
+
+When the request uses an existing VSTest project/solution, all inputs are known, and Html with the default filters is sufficient, read [run-report.md](references/run-report.md). Its bundled runner builds once, runs the complete tests without another build, verifies fresh XML, and generates a local report in one invocation. With an already connected MCP, request a verified-input handoff instead of installing a CLI.
+
+Keep the workflow below for interactive applications, custom report options, artifact sources, or test platforms other than VSTest. Preserve the user's selected producer and options.
+
 ## Required workflow
 
 1. Resolve the source/target branches, runtime source tree, application or test command, and output directory.

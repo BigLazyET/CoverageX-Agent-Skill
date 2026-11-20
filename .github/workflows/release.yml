@@ -28,6 +28,7 @@ jobs:
           python3 -m json.tool plugins/coveragex-agent-skill/.codex-plugin/plugin.json >/dev/null
           python3 -m json.tool plugins/coveragex-agent-skill/.cursor-plugin/plugin.json >/dev/null
           python3 plugins/coveragex-agent-skill/skills/coveragex-incremental-report/scripts/verify_coverage_xml.py --self-test
+          python3 -B -m unittest discover -s plugins/coveragex-agent-skill/skills/coveragex-incremental-report/scripts -p 'test_*.py'
 
       - name: Package marketplace
         run: |
