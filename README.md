@@ -86,11 +86,9 @@ Copy that complete directory to `~/.codex/skills/`, `.agents/skills/`, or `.curs
 
 ## Use
 
-Ask the harness for a CoverageX incremental report. AI discovers projects, DLLs and existing tests, then combines unresolved choices in a short plan. Choose current-run inputs (recommended) or allow selected existing files for this session. New application collection supports static and dynamic startup with the same collect → exercise → snapshot → merge workflow. Static collection offers inferred business DLLs or explicit paths. AI starts/checks the app and runs agreed existing tests; manual users only need to exercise it and say when done. Each report retains one final input-list confirmation.
+Ask the harness for a CoverageX incremental report. The canonical contract is [SKILL.md](plugins/coveragex-agent-skill/skills/coveragex-incremental-report/SKILL.md): current-run inputs by default, one final XML-list confirmation before each report, and the same collect → exercise → snapshot → merge flow for static and dynamic startup. Finite VSTest runs use the bundled [report runner](plugins/coveragex-agent-skill/skills/coveragex-incremental-report/references/run-report.md) with `--entry-point prepare`; after confirmation the host calls the CLI or an already connected MCP server.
 
-On first use, the Skill checks prerequisites. It never installs `dotnet-coverage` or `CoverageX.Command` without explicit approval. It can use an already configured `CoverageX.McpServer`, but does not bundle either CoverageX NuGet package.
-
-For finite VSTest workflows with default Html output, the bundled [report runner](plugins/coveragex-agent-skill/skills/coveragex-incremental-report/references/run-report.md) builds once, collects and validates fresh XML with `--entry-point prepare`. After the user confirms those files, AI calls the CLI or connected MCP without repeating collection. Standalone CLI/MCP modes remain compatible. Repeated application snapshots keep the app running and session context is retained; existing-only XML skips startup and build.
+The Skill does not install `dotnet-coverage` or `CoverageX.Command` without explicit approval, and it does not bundle either CoverageX NuGet package.
 
 ## Releases
 
