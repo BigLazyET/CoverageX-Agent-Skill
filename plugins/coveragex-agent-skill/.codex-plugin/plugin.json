@@ -15,7 +15,7 @@
   "interface": {
     "displayName": "CoverageX Agent Skill",
     "shortDescription": "Generate .NET coverage XML and incremental reports",
-    "longDescription": "Orchestrates fresh .NET coverage XML generation, verifies it, and runs CoverageX incremental report analysis.",
+    "longDescription": "Collects business applications through dotnet-coverage, or validates user-selected existing files regardless of producer, then runs CoverageX incremental reports after input confirmation.",
     "developerName": "BigLazyET",
     "category": "Developer Tools",
     "capabilities": ["Coverage collection", "Incremental reporting"],

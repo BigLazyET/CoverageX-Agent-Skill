@@ -30,13 +30,13 @@ Static differs only by explicit matching module parameters:
 dotnet-coverage collect --session-id <id> --include-files <absolute-entry.dll> --include-files <absolute-business-library.dll> --output-format cobertura --output <run/final.xml> dotnet <fresh-entry.dll> <app-args...>
 ```
 
-Pass each `--include-files` separately; correctly quote paths with spaces. Keep the session ID, mode and DLL scope. AI checks process/readiness/health, then runs agreed existing business automation and checks success, or gives the manual user the URL and asks them to signal completion. Startup/health alone is not business testing. Failed tests are reported and not presented as successful exercise.
+Pass each `--include-files` separately; correctly quote paths with spaces. Keep the session ID, mode and DLL scope. AI checks process/readiness/health and gives the user the URL and next step: signal when business operation is complete. Users or external HTTP/UI automation exercise the app; AI may execute explicitly authorized request-only actions. Startup/health alone is not business coverage. Do not run unit/integration test projects or arbitrary automation commands as part of this workflow.
 
 Inspect automation before recommending it: an end-to-end demo that starts its own collector or generates a report is not a request-only test script for this active session. Do not run it to bypass input confirmation or create a second session; recommend suitable existing request/tests or manual exercise instead.
 
 If only useful request commands embedded inside such a demo exist, AI may prepare a request-only plan from them, label it as extracted preparation rather than an existing standalone test script, and resolve the test choice in the plan card. After an agreed manual exercise is done, proceed to snapshot without replaying those requests or making the user reconfirm the test plan.
 
-For **finite VSTest** instead, use [run-report.md](run-report.md). Its dynamic-only platform guard does not govern this static application path; finite final XML remains distinct from an interactive snapshot.
+Use a build-capable SDK compatible with the project and its global.json. A newer SDK may build an older target framework; the application still needs its corresponding runtime. Do not require an older SDK merely because the application targets net8/net9, or silently force major runtime roll-forward.
 
 ## Snapshot and report, repeatedly
 

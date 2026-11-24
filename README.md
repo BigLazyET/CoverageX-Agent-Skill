@@ -1,6 +1,6 @@
 # CoverageX Agent Skill
 
-CoverageX Agent Skill prepares new .NET coverage with `dotnet-coverage` or `dotnet test`, or validates selected existing coverage, then generates an incremental report after the user confirms its inputs.
+CoverageX Agent Skill collects running .NET business applications with `dotnet-coverage`, or validates selected existing coverage, then generates an incremental report after the user confirms its inputs. It does not run unit/integration test projects or provide arbitrary automation-command execution.
 
 Coverage collection belongs to this Skill. CoverageX remains focused on consuming coverage XML and generating incremental analysis and output.
 
@@ -86,7 +86,7 @@ Copy that complete directory to `~/.codex/skills/`, `.agents/skills/`, or `.curs
 
 ## Use
 
-Ask the harness for a CoverageX incremental report. The canonical contract is [SKILL.md](plugins/coveragex-agent-skill/skills/coveragex-incremental-report/SKILL.md): current-run inputs by default, one final XML-list confirmation before each report, and the same collect → exercise → snapshot → merge flow for static and dynamic startup. Finite VSTest runs use the bundled [report runner](plugins/coveragex-agent-skill/skills/coveragex-incremental-report/references/run-report.md) with `--entry-point prepare`; after confirmation the host calls the CLI or an already connected MCP server.
+Ask the harness for a CoverageX incremental report. The canonical contract is [SKILL.md](plugins/coveragex-agent-skill/skills/coveragex-incremental-report/SKILL.md): current-run inputs by default, one final XML-list confirmation before each report, and the same collect → user/external business exercise → snapshot → merge flow for static and dynamic startup. After confirmation the host calls the CLI or an already connected MCP server. Existing files are accepted by supported format and validity, independently of the user's generating tool.
 
 The Skill does not install `dotnet-coverage` or `CoverageX.Command` without explicit approval, and it does not bundle either CoverageX NuGet package.
 
